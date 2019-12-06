@@ -10,10 +10,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import warnings 
+from keras.layers.core import Dropout
 warnings.filterwarnings('ignore')
 warnings.filterwarnings('ignore', category=DeprecationWarning)
 from xgboost import XGBRegressor
-import string as str
 
 def get_data():
     #get train data
@@ -89,6 +89,7 @@ print ('Number of nun-numerical columns with no nan values :',len(cat_cols))
 # Encoding
 combined = oneHotEncode(combined, cat_cols)
 
+"""
 # The correlation between the features
 #train_data = train_data[num_cols + cat_cols]
 train_data['Target'] = target
@@ -96,6 +97,7 @@ C_mat = train_data.corr()
 fig = plt.figure(figsize = (15,15))
 sb.heatmap(C_mat, vmax = .8, square = True)
 plt.show()
+"""
 
 # Load data
 X = pd.read_csv('development.csv')
@@ -125,6 +127,7 @@ X = pd.get_dummies(X, columns=['room_type','neighbourhood'], drop_first=True)
 
 # Initialize neural network
 NN_model = Sequential()
+
 # The Input Layer :
 NN_model.add(Dense(128, kernel_initializer='normal',input_dim = X.shape[1], activation='relu'))
 # The Hidden Layers :
@@ -133,6 +136,15 @@ NN_model.add(Dense(256, kernel_initializer='normal',activation='relu'))
 NN_model.add(Dense(256, kernel_initializer='normal',activation='relu'))
 # The Output Layer :
 NN_model.add(Dense(1, kernel_initializer='normal',activation='linear'))
+"""
+# RETE DI NICK
+n_features = len(X.iloc[0])
+NN_model.add(Dense(n_features, activation='relu', kernel_initializer='normal', input_dim=n_features))
+NN_model.add(Dropout(0.3))
+NN_model.add(Dense(n_features//2, activation='relu', kernel_initializer='normal'))
+NN_model.add(Dropout(0.3))
+NN_model.add(Dense(1, activation='linear',kernel_initializer='normal'))
+"""
 # Compile the network :
 NN_model.compile(loss='mse', optimizer='adam', metrics=['mean_absolute_error'])
 NN_model.summary()
@@ -143,7 +155,7 @@ checkpoint = ModelCheckpoint(checkpoint_name, monitor='val_loss', verbose = 1, s
 callbacks_list = [checkpoint]
 
 """Setup NN"""
-NN_model.fit(X, y, epochs=15, batch_size=32, validation_split = 0.2, callbacks=callbacks_list)
+NN_model.fit(X, y, epochs=50, batch_size=32, validation_split = 0.2, callbacks=callbacks_list)
 
 # Load wights file of the best model :
 wights_file = checkpoint.filepath # choose the best checkpoint 
