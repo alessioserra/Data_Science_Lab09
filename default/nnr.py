@@ -155,7 +155,7 @@ checkpoint = ModelCheckpoint(checkpoint_name, monitor='val_loss', verbose = 1, s
 callbacks_list = [checkpoint]
 
 """Setup NN"""
-NN_model.fit(X, y, epochs=50, batch_size=32, validation_split = 0.2, callbacks=callbacks_list)
+NN_model.fit(X, y, epochs=150, batch_size=32, validation_split = 0.2, callbacks=callbacks_list)
 
 # Load wights file of the best model :
 wights_file = checkpoint.filepath # choose the best checkpoint 
