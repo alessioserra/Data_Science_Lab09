@@ -134,7 +134,7 @@ NN_model.add(Dense(256, kernel_initializer='normal',activation='relu'))
 # The Output Layer :
 NN_model.add(Dense(1, kernel_initializer='normal',activation='linear'))
 # Compile the network :
-NN_model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['mean_absolute_error'])
+NN_model.compile(loss='mse', optimizer='adam', metrics=['mean_absolute_error'])
 NN_model.summary()
 
 #Checkpoint
@@ -143,12 +143,12 @@ checkpoint = ModelCheckpoint(checkpoint_name, monitor='val_loss', verbose = 1, s
 callbacks_list = [checkpoint]
 
 """Setup NN"""
-NN_model.fit(X, y, epochs=10, batch_size=32, validation_split = 0.2, callbacks=callbacks_list)
+NN_model.fit(X, y, epochs=15, batch_size=32, validation_split = 0.2, callbacks=callbacks_list)
 
 # Load wights file of the best model :
 wights_file = checkpoint.filepath # choose the best checkpoint 
 NN_model.load_weights(wights_file) # load it
-NN_model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['mean_absolute_error'])
+NN_model.compile(loss='mse', optimizer='adam', metrics=['mean_absolute_error'])
 
 
 def make_submission(prediction, sub_name):
