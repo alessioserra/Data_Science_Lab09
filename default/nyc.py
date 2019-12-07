@@ -48,8 +48,8 @@ X = X.drop(columns=['id','host_id','name','host_name','neighbourhood_group','min
 # Encode categorical attributes
 X = pd.get_dummies(X, columns=['room_type','neighbourhood'], drop_first=True)
 
-# Regression with XGBRegressor
-reg = XGBRegressor(max_depth=5, min_child_weight=5)
+# Regression with XGBRegresso
+reg = XGBRegressor(max_depth=5, min_child_weight=4)
 reg.fit(X,y)
 
 # Encode X_eval
