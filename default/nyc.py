@@ -4,10 +4,14 @@ Created on 4 dic 2019
 @author: zierp
 '''
 import numpy as np
-from sklearn.model_selection._split import train_test_split
-from sklearn.ensemble.forest import RandomForestRegressor
-from sklearn.metrics.regression import r2_score
 import pandas as pd
+from xgboost.sklearn import XGBRegressor
+
+def make_submission(prediction, sub_name):
+    my_submission = pd.DataFrame({'Id':pd.read_csv('evaluation.csv').id,'Predicted':prediction})
+    my_submission.to_csv('{}.csv'.format(sub_name),index=False)
+    print('A submission file has been made')
+
 np.random.seed(1234)
 #ex1
 X = []
@@ -18,8 +22,17 @@ X = []
 attributes?
 """
 
-# Load data
+# Load data and remove neighbourhood from X that are missing in X_eval
 X = pd.read_csv('development.csv')
+X_eval = pd.read_csv('evaluation.csv')
+ng_dev = set(X['neighbourhood'])
+ng_eval = set(X_eval['neighbourhood'])
+remove = []
+for el in ng_dev:
+    if not el in ng_eval:
+        remove.append(el)
+for el in remove:
+    X = X[X.neighbourhood != el ]
 # Discard rows with price = 0
 X = X[X.price > 0 ]
 
@@ -34,22 +47,18 @@ X = X.drop(columns=['id','host_id','name','host_name','neighbourhood_group','min
 """"""
 # Encode categorical attributes
 X = pd.get_dummies(X, columns=['room_type','neighbourhood'], drop_first=True)
-print(X.columns)
-#Regression
-X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.9, shuffle=False)
-reg = RandomForestRegressor(n_estimators=100, n_jobs=-1)
-reg.fit(X_train,y_train)
-y_pred = reg.predict(X_test)
 
-"""
-# re-convert in number
-for idx,el in enumerate(y_pred):
-    y_pred[idx] = np.exp(el)
-    
-for idx,el in enumerate(y_test):
-    y_test[idx] = np.exp(el)
-"""
-print("Accuracy: ",r2_score(y_pred, y_test))
+# Regression with XGBRegressor
+reg = XGBRegressor()
+reg.fit(X,y)
 
-# Evaluation
-X_eval = pd.read_csv('evaluation.csv')
+# Encode X_eval
+X_eval.fillna(0.0, inplace=True)
+X_eval = X_eval.drop(columns=['id','host_id','name','host_name','neighbourhood_group','minimum_nights','number_of_reviews','last_review'])
+X_eval = pd.get_dummies(X_eval, columns=['room_type','neighbourhood'], drop_first=True)
+
+# Predict
+XGBpredictions = reg.predict(X_eval)
+
+# Make submission file
+make_submission(XGBpredictions,'result')

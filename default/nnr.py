@@ -11,6 +11,7 @@ import pandas as pd
 import numpy as np
 import warnings 
 from keras.layers.core import Dropout
+from pygments.unistring import combine
 warnings.filterwarnings('ignore')
 warnings.filterwarnings('ignore', category=DeprecationWarning)
 from xgboost import XGBRegressor
@@ -77,6 +78,8 @@ train_data, test_data = get_data()
 
 #Combine train and test data to process them together
 combined, target = get_combined_data()
+
+print(combined)
 
 # Get the columns that do not have any missing values 
 num_cols = get_cols_with_no_nans(combined , 'num')
