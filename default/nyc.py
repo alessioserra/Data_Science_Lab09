@@ -6,6 +6,7 @@ Created on 4 dic 2019
 import numpy as np
 import pandas as pd
 from xgboost.sklearn import XGBRegressor
+from sklearn.preprocessing.data import StandardScaler
 
 def make_submission(prediction, sub_name):
     my_submission = pd.DataFrame({'Id':pd.read_csv('evaluation.csv').id,'Predicted':prediction})
@@ -38,27 +39,37 @@ X = X[X.price > 0 ]
 
 """Drop all useless columns and rows containing NaN"""
 X.fillna(0.0, inplace=True)
+
 # Build y containing price
+X['price'] = X['price'].map(lambda price: np.log(price)) #log scale sui price
 y = np.array(X.loc[:,['price']])
 # convert price in log(price)
 #for idx,el in enumerate(y):
     #y[idx] = np.log(el)
 X = X.drop(columns=['id','host_id','name','host_name','neighbourhood_group','minimum_nights','price','number_of_reviews','last_review'])
 """"""
-# Encode categorical attributes
+
+# Encode X
 X = pd.get_dummies(X, columns=['room_type','neighbourhood'], drop_first=True)
-
-# Regression with XGBRegresso
-reg = XGBRegressor(max_depth=5, min_child_weight=4)
-reg.fit(X,y)
-
 # Encode X_eval
 X_eval.fillna(0.0, inplace=True)
 X_eval = X_eval.drop(columns=['id','host_id','name','host_name','neighbourhood_group','minimum_nights','number_of_reviews','last_review'])
 X_eval = pd.get_dummies(X_eval, columns=['room_type','neighbourhood'], drop_first=True)
 
+"""Scaling"""
+x_scaler = StandardScaler()
+x_scaler.fit(X)
+X = x_scaler.transform(X)
+X_eval = x_scaler.transform(X_eval)
+""""""
+
+# Regression with XGBRegresso
+reg = XGBRegressor(max_depth=5, min_child_weight=1)
+reg.fit(X,y)
+
 # Predict
 XGBpredictions = reg.predict(X_eval)
+XGBpredictions = [float(np.exp(el)) for el in XGBpredictions ]
 
 # Make submission file
 make_submission(XGBpredictions,'result')
