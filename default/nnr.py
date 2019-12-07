@@ -92,7 +92,7 @@ print ('Number of nun-numerical columns with no nan values :',len(cat_cols))
 # Encoding
 combined = oneHotEncode(combined, cat_cols)
 
-"""
+
 # The correlation between the features
 #train_data = train_data[num_cols + cat_cols]
 train_data['Target'] = target
@@ -100,7 +100,7 @@ C_mat = train_data.corr()
 fig = plt.figure(figsize = (15,15))
 sb.heatmap(C_mat, vmax = .8, square = True)
 plt.show()
-"""
+
 
 # Load data
 X = pd.read_csv('development.csv')
