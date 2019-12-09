@@ -41,27 +41,27 @@ X = X[X.price > 0 ]
 X.fillna(0.0, inplace=True)
 
 # Build y containing price
-X['price'] = X['price'].map(lambda price: np.log(price)) #log scale sui price
+#X['price'] = X['price'].map(lambda price: np.log(price)) #log scale sui price
 y = np.array(X.loc[:,['price']])
 # convert price in log(price)
 #for idx,el in enumerate(y):
     #y[idx] = np.log(el)
-X = X.drop(columns=['id','host_id','name','host_name','neighbourhood_group','minimum_nights','price','number_of_reviews','last_review'])
+X = X.drop(columns=['name','host_name','neighbourhood_group','minimum_nights','price','number_of_reviews','last_review'])
 """"""
 
 # Encode X
 X = pd.get_dummies(X, columns=['room_type','neighbourhood'], drop_first=True)
 # Encode X_eval
 X_eval.fillna(0.0, inplace=True)
-X_eval = X_eval.drop(columns=['id','host_id','name','host_name','neighbourhood_group','minimum_nights','number_of_reviews','last_review'])
+X_eval = X_eval.drop(columns=['name','host_name','neighbourhood_group','minimum_nights','number_of_reviews','last_review'])
 X_eval = pd.get_dummies(X_eval, columns=['room_type','neighbourhood'], drop_first=True)
 
-"""Scaling"""
+"""Scaling
 x_scaler = StandardScaler()
 x_scaler.fit(X)
 X = x_scaler.transform(X)
 X_eval = x_scaler.transform(X_eval)
-""""""
+"""
 
 # Regression with XGBRegresso
 reg = XGBRegressor(max_depth=5, min_child_weight=1)
@@ -69,7 +69,7 @@ reg.fit(X,y)
 
 # Predict
 XGBpredictions = reg.predict(X_eval)
-XGBpredictions = [float(np.exp(el)) for el in XGBpredictions ]
+#XGBpredictions = [float(np.exp(el)) for el in XGBpredictions ] rescaling price
 
 # Make submission file
 make_submission(XGBpredictions,'result')
