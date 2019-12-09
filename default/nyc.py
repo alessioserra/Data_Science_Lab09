@@ -1,12 +1,12 @@
 '''
 Created on 4 dic 2019
-
 @author: zierp
 '''
 import numpy as np
 import pandas as pd
 from xgboost.sklearn import XGBRegressor
 from sklearn.preprocessing.data import StandardScaler
+from sklearn.model_selection import GridSearchCV
 
 def make_submission(prediction, sub_name):
     my_submission = pd.DataFrame({'Id':pd.read_csv('evaluation.csv').id,'Predicted':prediction})
@@ -63,8 +63,13 @@ X = x_scaler.transform(X)
 X_eval = x_scaler.transform(X_eval)
 """
 
-# Regression with XGBRegresso
-reg = XGBRegressor(max_depth=5, min_child_weight=1)
+# Regression with XGBRegressor
+reg = XGBRegressor(max_depth=5, min_child_weight=1, n_estimators = 105, n_jobs=-1)
+#param_grid = {'n_estimators' : [90,100,110]} 
+#gridsearch = GridSearchCV(reg, param_grid, scoring='r2', cv=5)
+#gridsearch.fit(X,y)
+#print(gridsearch.best_params_['n_estimators'])
+
 reg.fit(X,y)
 
 # Predict
